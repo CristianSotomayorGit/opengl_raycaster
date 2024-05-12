@@ -13,6 +13,27 @@ void drawPlayer() {
     glEnd();
 }
 
+void buttons(unsigned char key, int x, int y) {
+    
+    if (key == 'a') {
+        playerPositionX -= 5;
+    }
+
+    if (key == 'd') {
+        playerPositionX += 5;
+    }
+
+    if (key == 'w') {
+        playerPositionY -= 5;
+    }
+
+    if (key == 's') {
+        playerPositionY += 5;
+    }
+
+    glutPostRedisplay();
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawPlayer();
@@ -33,5 +54,6 @@ int main(int argc, char* argv[]) {
     glutCreateWindow("OpenGL Raycaster");
     init();
     glutDisplayFunc(display);
+    glutKeyboardFunc(buttons);
     glutMainLoop();
 }
