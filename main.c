@@ -5,6 +5,7 @@
 #define PI 3.1415
 #define PI2 PI / 2
 #define PI3 3 * PI / 2
+#define DR 0.0174533
 
 float playerPositionX;
 float playerPositionY;
@@ -176,9 +177,17 @@ void drawRays2D() {
     float xo;
     float yo;
 
-    ra = playerAngle;
+    ra = playerAngle - DR * 60;
 
-    for (r = 0; r < 1; r++) {
+    if (ra < 0) {
+        ra += 2 * PI; 
+    }
+
+    if (ra > 2 * PI) {
+        ra -= 2 * PI;
+    }
+
+    for (r = 0; r < 120; r++) {
         
         dof = 0;
 
@@ -287,14 +296,24 @@ void drawRays2D() {
         glVertex2i(playerPositionX, playerPositionY);
         glVertex2i(rx,ry);
         glEnd();
+
+        ra += DR;
+
+        if (ra < 0) {
+            ra += 2 * PI; 
+        }
+
+        if (ra > 2 * PI) {
+            ra -= 2 * PI;
+        }
     }
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawMap2D();
-    drawPlayer();
     drawRays2D();
+    drawPlayer();
     glutSwapBuffers();
 }
 
@@ -302,7 +321,7 @@ void init() {
     glClearColor(0.3, 0.3, 0.3, 0);
     gluOrtho2D(0, 1280, 1280, 0);
     
-    playerAngle = 0;
+    playerAngle = 1;
     playerPositionX = 300;
     playerPositionY = 300;
     playerDeltaX = cos(playerAngle) * 5;
