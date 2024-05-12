@@ -3,6 +3,8 @@
 #include <GL/glut.h>
 #include <math.h>
 #define PI 3.1415
+#define PI2 PI / 2
+#define PI3 3 * PI / 2
 
 float playerPositionX;
 float playerPositionY;
@@ -202,7 +204,7 @@ void drawRays3D() {
             my = (int)(ry) >> 6;
             mp = my * mapX + mx;
 
-            if (mp < mapX * mapY && map[mp] == 1) {
+            if (mp > 0 && mp < mapX * mapY && map[mp] == 1) {
                 dof = 20;
             }
 
@@ -217,6 +219,52 @@ void drawRays3D() {
         glBegin(GL_LINES);
         glVertex2i(playerPositionX, playerPositionY);
         glVertex2i(rx, ry);
+        glEnd();
+
+
+        dof = 0;
+        float nTan= -tan(ra);
+        
+        if (ra > PI2 && ra < PI3) {
+            rx = (((int)playerPositionX >>6) <<6) - 0.0001;
+            ry = (playerPositionX - rx) * nTan + playerPositionY;
+            xo = -64;
+            yo = -xo * nTan;
+        }
+
+        if (ra < PI2 || ra > PI3) {
+            rx = (((int)playerPositionX >>6) <<6) + 64;
+            ry = (playerPositionX - rx) * nTan + playerPositionY;
+            xo = 64;
+            yo = -xo * nTan;
+        }
+        
+        if (ra == 0 || ra == PI) {
+            rx = playerPositionX;
+            ry = playerPositionY;
+            dof = 20;
+        }
+        
+        while (dof < 20) {
+            mx = (int)(rx) >> 6;
+            my = (int)(ry) >> 6;
+            mp = my * mapX + mx;
+
+            if (mp > 0 && mp < mapX * mapY && map[mp] == 1) {
+                dof = 20;
+            }
+            else {
+                rx += xo;
+                ry += yo;
+                dof += 1;
+            } 
+        }
+        
+        glColor3f(1,0,0);
+        glLineWidth(1);
+        glBegin(GL_LINES);
+        glVertex2i(playerPositionX, playerPositionY);
+        glVertex2i(rx,ry);
         glEnd();
     }
 }
