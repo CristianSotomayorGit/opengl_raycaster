@@ -96,19 +96,19 @@ void updatePosition() {
             playerAngle += 2 * PI;
         }
     
-        playerDeltaX = cos(playerAngle) * 2.5;
-        playerDeltaY = sin(playerAngle) * 2.5;
+        playerDeltaX = cos(playerAngle) * 5;
+        playerDeltaY = sin(playerAngle) * 5;
     }
 
     if (rotateRight) {
         playerAngle += 0.05;
 
-        if (playerAngle > 0) {
+        if (playerAngle > 2 * PI) {
             playerAngle -= 2 * PI;
         }
     
-        playerDeltaX = cos(playerAngle) * 2.5;
-        playerDeltaY = sin(playerAngle) * 2.5;
+        playerDeltaX = cos(playerAngle) * 5;
+        playerDeltaY = sin(playerAngle) * 5;
     }
 
     if (moveUp) {
@@ -157,10 +157,75 @@ void keyUp(unsigned char key, int x, int y) {
     }
 }
 
+void drawRays3D() {
+    int r;
+    int mx;
+    int my;
+    int mp;
+    int dof;
+
+    float rx;
+    float ry;
+    float ra;
+    float xo;
+    float yo;
+
+    ra = playerAngle;
+
+    for (r = 0; r < 1; r++) {
+        
+        dof = 0;
+        float aTan = -1/tan(ra);
+
+        if (ra > PI) {
+            ry = (((int)playerPositionY >> 6) <<6) - 0.0001;
+            rx = (playerPositionY - ry) * aTan + playerPositionX;
+            yo = -64;
+            xo = -yo * aTan;
+        }
+
+        if (ra < PI) {
+            ry = (((int)playerPositionY >> 6) <<6) + 64;
+            rx = (playerPositionY - ry) * aTan + playerPositionX;
+            yo = 64;
+            xo = -yo * aTan;
+        }
+
+        if (ra == 0 || ra == PI) {
+            rx = playerPositionX;
+            ry = playerPositionY;
+            dof = 20;
+        }
+
+        while (dof < 20) {
+            mx = (int)(rx) >> 6;
+            my = (int)(ry) >> 6;
+            mp = my * mapX + mx;
+
+            if (mp < mapX * mapY && map[mp] == 1) {
+                dof = 20;
+            }
+
+            else {
+                rx += xo;
+                ry += yo;
+                dof += 1;
+            }
+        }
+        glColor3f(0,1,0);
+        glLineWidth(1);
+        glBegin(GL_LINES);
+        glVertex2i(playerPositionX, playerPositionY);
+        glVertex2i(rx, ry);
+        glEnd();
+    }
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawMap2D();
     drawPlayer();
+    drawRays3D();
     glutSwapBuffers();
 }
 
@@ -168,10 +233,11 @@ void init() {
     glClearColor(0.3, 0.3, 0.3, 0);
     gluOrtho2D(0, 1280, 1280, 0);
     
+    playerAngle = 0;
     playerPositionX = 300;
     playerPositionY = 300;
-    playerDeltaX = cos(playerAngle) * 2.5;
-    playerDeltaY = sin(playerAngle) * 2.5;
+    playerDeltaX = cos(playerAngle) * 5;
+    playerDeltaY = sin(playerAngle) * 5;
 }
 
 int main(int argc, char* argv[]) {
