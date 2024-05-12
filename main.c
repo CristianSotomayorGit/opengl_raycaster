@@ -159,7 +159,11 @@ void keyUp(unsigned char key, int x, int y) {
     }
 }
 
-void drawRays3D() {
+float dist(float ax, float ay, float bx, float by, float ang) {
+    return (sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay))); //pythagorean theorem
+}
+
+void drawRays2D() {
     int r;
     int mx;
     int my;
@@ -177,6 +181,10 @@ void drawRays3D() {
     for (r = 0; r < 1; r++) {
         
         dof = 0;
+
+        float disH = 1000000;
+        float hx = playerPositionX;
+        float hy = playerPositionY;
         float aTan = -1/tan(ra);
 
         if (ra > PI) {
@@ -205,6 +213,9 @@ void drawRays3D() {
             mp = my * mapX + mx;
 
             if (mp > 0 && mp < mapX * mapY && map[mp] == 1) {
+                hx = rx;
+                hy = ry;
+                disH = dist(playerPositionX, playerPositionY, hx, hy, ra);
                 dof = 20;
             }
 
@@ -214,15 +225,12 @@ void drawRays3D() {
                 dof += 1;
             }
         }
-        glColor3f(0,1,0);
-        glLineWidth(1);
-        glBegin(GL_LINES);
-        glVertex2i(playerPositionX, playerPositionY);
-        glVertex2i(rx, ry);
-        glEnd();
-
 
         dof = 0;
+
+        float disV = 1000000;
+        float vx = playerPositionX;
+        float vy = playerPositionY;
         float nTan= -tan(ra);
         
         if (ra > PI2 && ra < PI3) {
@@ -251,6 +259,9 @@ void drawRays3D() {
             mp = my * mapX + mx;
 
             if (mp > 0 && mp < mapX * mapY && map[mp] == 1) {
+                vx = rx;
+                vy = ry;
+                disV = dist(playerPositionX, playerPositionY, vx, vy, ra);
                 dof = 20;
             }
             else {
@@ -258,6 +269,16 @@ void drawRays3D() {
                 ry += yo;
                 dof += 1;
             } 
+        }
+
+        if (disV < disH) {
+            rx = vx;
+            ry = vy;
+        }
+
+        if (disH < disV) {
+            rx = hx;
+            ry = hy;
         }
         
         glColor3f(1,0,0);
@@ -273,7 +294,7 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawMap2D();
     drawPlayer();
-    drawRays3D();
+    drawRays2D();
     glutSwapBuffers();
 }
 
