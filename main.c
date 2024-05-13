@@ -5,7 +5,9 @@
 #define PI 3.1415
 #define PI2 PI / 2
 #define PI3 3 * PI / 2
-#define DR 0.0174533
+// #define DR 0.0174533
+// #define DR 0.00872665
+#define DR 0.0043633
 
 float playerPositionX;
 float playerPositionY;
@@ -176,8 +178,9 @@ void drawRays2D() {
     float ra;
     float xo;
     float yo;
+    float distT;
 
-    ra = playerAngle - DR * 60;
+    ra = playerAngle - DR * 120;
 
     if (ra < 0) {
         ra += 2 * PI; 
@@ -187,7 +190,7 @@ void drawRays2D() {
         ra -= 2 * PI;
     }
 
-    for (r = 0; r < 120; r++) {
+    for (r = 0; r < 240; r++) {
         
         dof = 0;
 
@@ -283,18 +286,48 @@ void drawRays2D() {
         if (disV < disH) {
             rx = vx;
             ry = vy;
+            distT = disV;
+            glColor3f(1, 0, 0);
         }
 
         if (disH < disV) {
             rx = hx;
             ry = hy;
+            distT = disH;
+            glColor3f(0.5, 0, 0);
         }
         
-        glColor3f(1,0,0);
         glLineWidth(1);
         glBegin(GL_LINES);
         glVertex2i(playerPositionX, playerPositionY);
         glVertex2i(rx,ry);
+        glEnd();
+
+
+        //Draw 3D Walls
+        //Fix fisheye distortion
+        float ca = playerAngle - ra;
+        
+        if (ca < 0) {
+            ca += 2 * PI; 
+        }
+
+        if (ca > 2 * PI) {
+            ca -= 2 * PI;
+        }
+
+        distT = distT * cos(ca);
+        float lineH = (mapS * 1280) / distT;
+        float lineO = 640 - lineH / 2;
+
+        // if (lineH > 1280) {
+        //     lineH = 1280;
+        // }
+
+        glLineWidth(6);
+        glBegin(GL_LINES);
+        glVertex2i(r * 5.333 + 1280, lineO);
+        glVertex2i(r * 5.333 + 1280, lineH + lineO);
         glEnd();
 
         ra += DR;
@@ -319,7 +352,7 @@ void display() {
 
 void init() {
     glClearColor(0.3, 0.3, 0.3, 0);
-    gluOrtho2D(0, 1280, 1280, 0);
+    gluOrtho2D(0, 2560, 1280, 0);
     
     playerAngle = 1;
     playerPositionX = 300;
@@ -331,7 +364,7 @@ void init() {
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(1280, 1280);
+    glutInitWindowSize(2560, 1280);
     glutCreateWindow("OpenGL Raycaster");
     init();
     glutDisplayFunc(display);
